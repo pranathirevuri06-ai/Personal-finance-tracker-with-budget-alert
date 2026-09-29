@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+{% if data.alert %}
+<div class="alert budget-alert alert-{{ 'danger' if data.alert.type in ['danger','critical'] else 'warning' }}" data-popup="{{ data.alert.message }}">
+  {{ data.alert.message }} <strong>{{ data.alert.used }}% used</strong>
+</div>
+{% endif %}
+<div class="page-heading"><h1>Dashboard</h1><a class="btn btn-primary" href="{{ url_for('transactions') }}"><i class="bi bi-plus-lg"></i> Add Transaction</a></div>
+<div class="stat-grid">
+  <div class="stat glass"><span>Total Income</span><strong>₹{{ '%.2f'|format(data.income) }}</strong></div>
+  <div class="stat glass"><span>Total Expenses</span><strong>₹{{ '%.2f'|format(data.expenses) }}</strong></div>
+  <div class="stat glass"><span>Remaining Balance</span><strong>₹{{ '%.2f'|format(data.balance) }}</strong></div>
+  <div class="stat glass"><span>Monthly Budget</span><strong>₹{{ '%.2f'|format(data.budget) }}</strong></div>
+  <div class="stat glass"><span>Savings Goal</span><strong>₹{{ '%.2f'|format(data.savings_goal) }}</strong></div>
+  <div class="stat glass"><span>Current Savings</span><strong>₹{{ '%.2f'|format(data.current_savings) }}</strong></div>
+</div>
+<div class="content-grid mt-4">
+  <section class="panel glass budget-alert-card {{ 'danger' if data.alert and data.alert.type in ['danger','critical'] else 'warning' if data.alert else 'success' }}">
+    <h2>Budget Alert</h2>
+    {% if data.alert %}
+      <p>{{ data.alert.message }}</p>
+      <div class="progress mb-3">
+        <div class="progress-bar {{ 'bg-danger' if data.alert.type == 'critical' else 'bg-warning' if data.alert.type == 'warning' else 'bg-info' }}" style="width: {{ data.budget_used_pct|round(1) }}%">{{ data.budget_used_pct }}%</div>
+      </div>
+      <small>Expense-based budget usage: {{ data.budget_used_pct }}% of {{ '₹%.2f'|format(data.budget) }}</small>
+    {% else %}
+      <p class="text-success">You are within your budget limit. Keep up the disciplined spending.</p>
+    {% endif %}
+  </section>
+  <section class="panel glass financial-summary-panel">
+    <h2>Financial Summary</h2>
+    <div class="summary-grid">
+      <div><span>Budget Used</span><strong>{{ data.budget_used_pct }}%</strong></div>
+      <div><span>Monthly Budget</span><strong>₹{{ '%.2f'|format(data.budget) }}</strong></div>
+      <div><span>Savings Goal</span><strong>₹{{ '%.2f'|format(data.savings_goal) }}</strong></div>
+      <div><span>Remaining Balance</span><strong>₹{{ '%.2f'|format(data.balance) }}</strong></div>
+    </div>
+  </section>
+</div>
+<div class="content-grid mt-4">
+  <section class="panel glass savings-panel">
+    <h2>Savings Progress</h2>
+    <div class="summary-grid">
+      <div><span>Goal</span><strong>₹{{ '%.2f'|format(data.savings_goal) }}</strong></div>
+      <div><span>Saved</span><strong>₹{{ '%.2f'|format(data.current_savings) }}</strong></div>
+      <div><span>Remaining</span><strong>₹{{ '%.2f'|format(data.remaining_savings) }}</strong></div>
+      <div><span>Progress</span><strong>{{ data.savings_progress }}%</strong></div>
+    </div>
+    <div class="progress mt-3 savings-progress-bar" role="progressbar" aria-valuenow="{{ data.savings_progress }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar savings" style="width: {{ data.savings_progress|round(1) }}%">{{ data.savings_progress }}%</div>
+    </div>
+    <p class="text-muted mt-2">{{ data.savings_message }}</p>
+  </section>
+</div>
+<div class="content-grid mt-4">
+  <section class="panel glass"><h2>Expense Category Pie Chart</h2><canvas id="categoryChart"></canvas></section>
+  <section class="panel glass"><h2>Monthly Expense Bar Chart</h2><canvas id="monthlyChart"></canvas></section>
+</div>
+<div class="content-grid mt-4">
+    <h2>Recent Transactions</h2>
+    <div class="table-responsive"><table class="table align-middle">
+      <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Type</th></tr></thead>
+      <tbody>{% for tx in data.recent %}<tr><td>{{ tx.transaction_date }}</td><td>{{ tx.category }}</td><td>₹{{ tx.amount }}</td><td><span class="badge text-bg-{{ 'success' if tx.type == 'Income' else 'danger' }}">{{ tx.type }}</span></td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  <section class="panel glass">
+    <h2>Notification Center</h2>
+    {% for alert in alerts %}<div class="notification {{ alert.alert_type }}">{{ alert.message }}<small>{{ alert.created_at }}</small></div>{% else %}<p class="text-muted">No alerts yet.</p>{% endfor %}
+  </section>
+</div>
+<section class="panel glass mt-4">
+  <h2>AI Spending Prediction & Smart Suggestions</h2>
+  <div class="insight-grid">
+    <div><span>Predicted Monthly Spend</span><strong>₹{{ '%.2f'|format(data.insights.predicted_spend) }}</strong></div>
+    <div><span>Expense Recommendation</span><p>{{ data.insights.recommendation }}</p></div>
+    <div><span>Smart Savings Suggestion</span><p>{{ data.insights.savings }}</p></div>
+  </div>
+</section>
+{% endblock %}

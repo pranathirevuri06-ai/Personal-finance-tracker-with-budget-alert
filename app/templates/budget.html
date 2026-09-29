@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><h1>Budget Management</h1></div>
+<div class="content-grid">
+  <section class="panel glass">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label class="form-label">Set Monthly Budget</label>
+      <input class="form-control form-control-lg" type="number" min="0" step="0.01" name="monthly_budget" value="{{ data.budget }}">
+      <label class="form-label mt-3">Set Monthly Savings Goal</label>
+      <input class="form-control form-control-lg" type="number" min="0" step="0.01" name="savings_goal" value="{{ data.savings_goal }}">
+      <div class="d-flex gap-2 mt-3"><button class="btn btn-primary">Edit Budget</button><button class="btn btn-outline-danger" name="action" value="delete">Delete Budget</button></div>
+    </form>
+  </section>
+  <section class="panel glass">
+    <h2>Budget Status</h2>
+    <div class="budget-summary"><span>Budget Limit</span><strong>₹{{ '%.2f'|format(data.budget) }}</strong></div>
+    <div class="budget-summary"><span>Current Spending</span><strong>₹{{ '%.2f'|format(data.monthly_spend) }}</strong></div>
+    <div class="budget-summary"><span>Remaining Budget</span><strong>₹{{ '%.2f'|format(data.remaining_budget) }}</strong></div>
+    <div class="budget-summary"><span>Savings Goal</span><strong>₹{{ '%.2f'|format(data.savings_goal) }}</strong></div>
+    <div class="budget-summary"><span>Current Savings</span><strong>₹{{ '%.2f'|format(data.current_savings) }}</strong></div>
+    <div class="budget-summary"><span>Remaining Savings</span><strong>₹{{ '%.2f'|format(data.remaining_savings) }}</strong></div>
+    <div class="progress mt-3" role="progressbar"><div class="progress-bar budget-progress" style="width: {{ [used_pct,100]|min }}%" data-used="{{ used_pct }}">{{ used_pct }}%</div></div>
+    <div class="progress mt-3 savings-progress-meter" role="progressbar" aria-valuenow="{{ data.savings_progress }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar savings" style="width: {{ data.savings_progress|round(1) }}%">{{ data.savings_progress }}%</div>
+    </div>
+    <p class="text-muted mt-2">{{ data.savings_message }}</p>
+  </section>
+</div>
+{% endblock %}
